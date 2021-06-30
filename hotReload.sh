@@ -1,3 +1,5 @@
 #!/bin/bash
 
-fswatch -o . | xargs -I {} tflint
+cd "$(dirname "$0")" || exit 1
+
+reflex -r '\.tf$' ./exe.sh

@@ -7,6 +7,6 @@ module "web_server" {
   instance_type = "t3.micro"
 }
 
-output "pulic_dns" {
+output "public_dns" {
   value = module.web_server.public_dns
 }

@@ -2,9 +2,9 @@ provider "aws" {
   region = "ap-northeast-1"
 }
 
-# TF_VAR_aws_account_id=   terraform plan
-variable "aws_account_id" {
-  default = "hoge"
+# ap-northeast-1
+variable "elb_id" {
+  default = "582318560864"
 }
 
 
@@ -70,7 +70,7 @@ data "aws_iam_policy_document" "alb_log" {
 
     principals {
       type        = "AWS"
-      identifiers = [var.aws_account_id]
+      identifiers = [var.elb_id]
     }
   }
 }

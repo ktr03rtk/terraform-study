@@ -4,7 +4,11 @@ variable "elb_id" {
 }
 
 variable "domain_name" {
-  default = ""
+    default = ""
+}
+
+variable "certificate_domain_name" {
+    default = ""
 }
 
 resource "aws_lb_listener" "http" {
@@ -75,7 +79,7 @@ module "http_redirect_sg" {
   cidr_blocks = ["0.0.0.0/0"]
 }
 
-data "aws_route53_zone" "example" {
+resource "aws_route53_zone" "example" {
   name = var.domain_name
 }
 
@@ -84,8 +88,8 @@ resource "aws_route53_zone" "test_example" {
 }
 
 resource "aws_route53_record" "example" {
-  zone_id = data.aws_route53_zone.example.zone_id
-  name    = data.aws_route53_zone.example.name
+  zone_id = aws_route53_zone.example.zone_id
+  name    = aws_route53_zone.example.name
   type    = "A"
 
   alias {
@@ -99,35 +103,53 @@ output "domain_name" {
   value = aws_route53_record.example.name
 }
 
-resource "aws_acm_certificate" "example" {
-  domain_name               = aws_route53_record.example.name
-  subject_alternative_names = []
-  validation_method         = "DNS"
+//resource "aws_acm_certificate" "example" {
+//  domain_name               = aws_route53_record.example.name
+//  subject_alternative_names = []
+//  validation_method         = "DNS"
+//
+//  lifecycle {
+//    create_before_destroy = true
+//  }
+//}
 
-  lifecycle {
-    create_before_destroy = true
-  }
+data "aws_acm_certificate" "example" {
+  domain      = var.certificate_domain_name
+  types       = ["AMAZON_ISSUED"]
+  most_recent = true
 }
 
 //resource "aws_route53_record" "example_certificate" {
-//  name    = aws_acm_certificate.example.domain_validation_options[0].resource_record_name
-//  type    = aws_acm_certificate.example.domain_validation_options[0].resource_record_type
-//  records = [aws_acm_certificate.example.domain_validation_options[0].resource_record_value]
-//  zone_id = data.aws_route53_zone.example.id
-//  ttl     = 60
+//  // follow upgrade guide
+//  // https://registry.terraform.io/providers/hashicorp/aws/latest/docs/guides/version-3-upgrade#resource-aws_acm_certificate
+//  for_each = {
+//    for dvo in aws_acm_certificate.example.domain_validation_options : dvo.domain_name => {
+//      name   = dvo.resource_record_name
+//      record = dvo.resource_record_value
+//      type   = dvo.resource_record_type
+//    }
+//  }
+//
+//  allow_overwrite = true
+//  name            = each.value.name
+//  records         = [each.value.record]
+//  ttl             = 60
+//  type            = each.value.type
+//  zone_id         = aws_route53_zone.example.id
 //}
-
-
+//
+//
 //resource "aws_acm_certificate_validation" "example" {
 //  certificate_arn         = aws_acm_certificate.example.arn
-//  validation_record_fqdns = [aws_route53_record.example_certificate.fqdn]
+//  validation_record_fqdns = [for record in aws_route53_record.example_certificate : record.fqdn]
+//
 //}
 
 resource "aws_lb_listener" "https" {
   load_balancer_arn = aws_lb.example.arn
   port              = "443"
   protocol          = "HTTPS"
-  certificate_arn   = aws_acm_certificate.example.arn
+  certificate_arn   = data.aws_acm_certificate.example.arn
   ssl_policy        = "ELBSecurityPolicy-2016-08"
 
   default_action {
@@ -148,14 +170,12 @@ resource "aws_lb_listener" "redirect_http_to_https" {
   protocol          = "HTTP"
 
   default_action {
-
     type = "redirect"
 
-    fixed_response {
-      content_type = "text/plain"
-      //      port         = "443"
-      //      protocol     = "HTTPS"
-      //      status_code = "HTTP_301"
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
     }
   }
 }
@@ -192,8 +212,9 @@ resource "aws_lb_listener_rule" "example" {
   }
 
   condition {
-    //    field  = "path-pattern"
-    //    values = ["/*"]
+    path_pattern {
+      values = ["/*"]
+    }
   }
 }
 

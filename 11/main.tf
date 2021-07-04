@@ -1,0 +1,15 @@
+provider "aws" {
+  region = "ap-northeast-1"
+}
+
+resource "aws_kms_key" "example" {
+  description             = "Example Customer Manager Key"
+  enable_key_rotation     = true
+  is_enabled              = true
+  deletion_window_in_days = 30
+}
+
+resource "aws_kms_alias" "example" {
+  target_key_id = aws_kms_key.example.key_id
+  name          = "alias/example"
+}

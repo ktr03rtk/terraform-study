@@ -1,7 +1,3 @@
-provider "aws" {
-  region = "ap-northeast-1"
-}
-
 variable "name" {}
 variable "policy" {}
 variable "identifier" {}

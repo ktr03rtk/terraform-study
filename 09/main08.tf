@@ -1,14 +1,9 @@
+variable "domain_name" {}
+variable "certificate_domain_name" {}
+
 # ap-northeast-1
 variable "elb_id" {
   default = "582318560864"
-}
-
-variable "domain_name" {
-    default = ""
-}
-
-variable "certificate_domain_name" {
-    default = ""
 }
 
 resource "aws_lb_listener" "http" {

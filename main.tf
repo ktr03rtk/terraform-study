@@ -102,7 +102,8 @@ module "codepipeline_role" {
 }
 
 resource "aws_s3_bucket" "artifact" {
-  bucket = "trial-artifact-pragmatic-terraform"
+  bucket        = "trial-artifact-pragmatic-terraform"
+  force_destroy = true
 
   lifecycle_rule {
     enabled = true

@@ -34,8 +34,9 @@ resource "aws_s3_bucket_public_access_block" "private" {
 }
 
 resource "aws_s3_bucket" "public" {
-  bucket = "study-public-pragmatic-terraform"
-  acl    = "public-read"
+  bucket        = "study-public-pragmatic-terraform"
+  acl           = "public-read"
+  force_destroy = true
 
   cors_rule {
     allowed_origins = ["https://example.com"]
@@ -46,7 +47,8 @@ resource "aws_s3_bucket" "public" {
 }
 
 resource "aws_s3_bucket" "alb_log" {
-  bucket = "study-alb-log-pragmatic-terraform"
+  bucket        = "study-alb-log-pragmatic-terraform"
+  force_destroy = true
 
   lifecycle_rule {
     enabled = true

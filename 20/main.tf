@@ -1,4 +1,3 @@
-variable "tfstate_bucket_name" {}
 
 provider "aws" {
   region  = "ap-northeast-1"
@@ -7,10 +6,9 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    bucket = var.tfstate_bucket_name
+    bucket = ""
     key    = "example/terraform.tfstate"
     region = "ap-northeast-1"
   }
   required_version = "0.13.2"
 }
-
